@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrbitalEye - 3D Scene</title>
+    <style>
+        body { margin: 0; background-color: #000; overflow: hidden; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <!-- We will load three.js directly from the web for simplicity -->
+    <script type="module">
+
+        //three.js has four major concepts that we need to remember 
+        //1.The scene setup-- it is the main stage where out animations play out
+        //2.The main actor(earth in our case)
+        //3.The animation-- animate function's job is to run in a continous loop over and over again, to create illusion of movement
+        //4.renderer.render--  it tells the to render the scene from camera's pov wherever we set the camera in out setup, this is the last command in the animate function
+
+
+
+        // the main three.js library
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+
+        // --- 1. The Scene Setup (The "Stage") 
+        const scene = new THREE.Scene();                                    //defining a new stage
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);      // position of the camera i.e from where the user would see the earth
+        const renderer = new THREE.WebGLRenderer({ antialias: true });      //this is the projector it takes what the camera sees and draws it onto the screen
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // --- 2. The Earth (main actor) 
+        const earthGeometry = new THREE.SphereGeometry(1, 32, 32); // A sphere with radius 1
+        const earthMaterial = new THREE.MeshBasicMaterial({ color: 0x0077ff }); // A simple blue material
+        const earth = new THREE.Mesh(earthGeometry, earthMaterial);         //combining the shape and the color 
+        scene.add(earth);                                                   // adding our actor to the stage
+
+        //we did not give any coordinates to our main actor(earth) so it is by default placed at (0,0,0) i.e the center of our stage
+
+
+        //similarly making more actors(smaller satellites and adding them to our scene)
+        // --- 3. The Satellites (more ators) 
+        const satelliteGeometry = new THREE.SphereGeometry(0.05, 8, 8); // A smaller sphere
+        const satelliteMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff }); // A white material
+        const satellite1 = new THREE.Mesh(satelliteGeometry, satelliteMaterial);
+        const satellite2 = new THREE.Mesh(satelliteGeometry, satelliteMaterial.clone()); // A second satellite
+        scene.add(satellite1);
+        scene.add(satellite2);
+
+        // Position the camera so we can see the scene
+        camera.position.z = 5;
+
+        // --- 4. The Animation (The "Action!") ---
+        function animate() {
+            requestAnimationFrame(animate); // This creates a loop
+
+            // Rotating the Earth
+            earth.rotation.y += 0.001;
+
+            // Making the satellites orbit
+            const time = Date.now() * 0.0005;               //Date.now() gives the seconds that has passed since 1970 which is very large number so we multiply it by small number to make our satellite move slowly
+            satellite1.position.x = Math.cos(time) * 2;     //produces a circular orbit as the time increases
+            satellite1.position.z = Math.sin(time) * 2;     //we are using cos for x axis and sin for z axis which plots a circle along x-z axis(path of satellit 1)
+
+            //when we do Math.cos(time)*2 it creates a circular path that is centered around the center i.e (0,0,0)
+            //Math.cos(angle) gives us the x coordinate of the unit circle and Math.sin(angle) gives us the y coordinate of the unit circle
+            //as time changes the angle increases and the point moves forward wrt to the angle 
+            //Math.cos(time) gives us the position on a circle with radius 1 so if we multiply the result by 2 or 2.5 it gives us the position of the point on the circle of radius 2 or 2.5 respectively
+
+
+            satellite2.position.x = Math.cos(time * 0.7) * 2.5;     //path of satellite 2(circle along (x-y axis)
+            satellite2.position.y = Math.sin(time * 0.7) * 2.5;     //2.5 is the radius of that circle
+
+            // Rendering the scene from the camera's perspective
+            renderer.render(scene, camera);
+        }
+
+        // Start the animation
+        animate();
+    </script>
+</body>
+</html>
