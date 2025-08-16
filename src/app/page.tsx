@@ -164,6 +164,7 @@ export default function HomePage() {
 
         controls.update();
         renderer.render(scene, camera);
+        //rendered takes the snapshot of our scene at this exact moment and shows it to us(draws it on the screen) this happens 60 times per second which gives us the illusion of animation
     };
     animate();
 
