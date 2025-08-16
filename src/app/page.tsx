@@ -4,33 +4,37 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import axios from 'axios';
-import satellite from 'satellite.js';
+import * as satellite from 'satellite.js';
+let time = Date.now();
 
 
 // Define a type for our satellite data to make the code safer
-type Satellite = {
-  id: string;
-  name: string;
-  color: number;
-  orbit: {
-    radius: number;
-    speed: number;
-    inclination: number;
-  };
-};
+// type Satellite = {
+//   id: string;
+//   name: string;
+//   color: number;
+//   orbit: {                         //it was used when we were fetching dummy data from our backend
+//     radius: number;
+//     speed: number;
+//     inclination: number;
+//   };
+// };
 
 type SatelliteObject = {
 
   mesh:THREE.Mesh;        //what is THREE.mesh ?
-  satrec:any;             //satellite record from satellite.js
+  // A THREE.Mesh is the most common type of object in Three.js. It's simply an object that has a shape (a Geometry) and an appearance (a Material). It's the final, visible "actor" that you place on the stage.
+
+
+  satrec:any;             //satellite record from satellite.js, it is a special object that contains a function that performs all the complex math operations on the satellite data to give its orbit and other details
   name:string;  
 }
 
 export default function HomePage() {
   const mountRef = useRef<HTMLDivElement>(null);
   // 1. New state to store our satellite data
-  const [satellites, setSatellites] = useState<Satellite[]>([]);
-
+  const [satellites, setSatellites] = useState<SatelliteObject[]>([]);
+  const[satelliteSpeed,setSatelliteSpeed] = useState(60);
 
   
 
@@ -41,19 +45,84 @@ export default function HomePage() {
   // 2. This useEffect fetches the data from our API
 
   //Fetching the tle set data from our backend, rn its raw text we will have to parse it
+
   //data has three lines--name,its orbit varying data and its orbit parameters
+
   //we will have to split data into individual lines of array
   //then for each satellite read its next two lines and process that data
   useEffect(() => {
-    const fetchSatelliteData = async () => {
-      try {
+
+    const initializeSatellites = async()=>{
+
+      try{
         const response = await axios.get('/api/orbits');
-        setSatellites(response.data.satellites);
-      } catch (error) {
-        console.error("Failed to fetch satellite data:", error);
+        const satelliteData = response.data.satellites;
+
+        const processedSatellites = satelliteData.map((sat: any) => {
+          // Create the physics model from the provided lines
+          const satrec = satellite.twoline2satrec(sat.tleLine1, sat.tleLine2);
+          return {
+            mesh: new THREE.Mesh(
+              new THREE.SphereGeometry(0.05, 8, 8),
+              new THREE.MeshBasicMaterial({ color: Math.random() * 0xffffff })),
+            satrec,
+            name: sat.name,
+            
+          };
+        });
+
+        setSatellites(processedSatellites);
+
+
+
+
+        // const satrecs = [];                             //empty array to store all the processed satellites to add to our scene later
+
+       
+
+
+
+        //     const satrec = satellite.twoline2satrec(tleLine1,tleLine2);       //this is the inbuilt function of satellite.js
+        //                                                                       //it takes the raw two lines of the tle data then performs all the complex calculations to convert the data into special satrec object
+
+        //     //this satrec object is the physics model that we can use to predict satellite's position at any given time 
+
+
+
+        //     satrecs.push({satrec,name});                       //add the satellite to our satrecs array
+
+        //   }
+
+
+        // }
+
+        // setSatellites(satrecs.map(s=>({
+        //   mesh:new THREE.Mesh(
+        //     new THREE.SphereGeometry(0.05,8,8),                         //creating the geometry for each satellite, gray color for each satellite for now
+        //     new THREE.MeshBasicMaterial({color:'gray'})
+
+        //   ),
+        //   satrec:s.satrec,                                              //physics model which would be used fpr calulating the position of each satellite
+        //   name:s.name,                                  
+
+
+        // })));
+
+
+
+      } catch(error){
+        console.error('Failed to fetch satellite data: ',error);
       }
+
+
+
     };
-    fetchSatelliteData();
+
+    initializeSatellites();
+
+
+
+
   }, []); // Runs once on page load to fetch the satellite data present at the backend
 
 
@@ -116,17 +185,22 @@ export default function HomePage() {
 
 
     // --- 4. DYNAMIC Satellites & Orbits ---
-    const satelliteObjects: THREE.Mesh[] = [];                                          //array to store satellites from fetched from our backend 
+    // const satelliteObjects: THREE.Mesh[] = [];                                          //array to store satellites from fetched from our backend 
     
     
 
-    satellites.forEach(satData => {                                                     //we are looping through the sattelites object that we received from the backend here
-      const satGeometry = new THREE.SphereGeometry(0.05, 8, 8);                         //here we are giving the shape of the satellites i.e 0.5 radius circles
-      const satMaterial = new THREE.MeshBasicMaterial({ color: satData.color });        //color that is stored inside satellites.color
-      const satellite = new THREE.Mesh(satGeometry, satMaterial);                       //combining the shape and the color
-      satelliteObjects.push(satellite);                                                 //adding the satellite to the satellite array here this would be used later for animating the satellites
-      scene.add(satellite);                                                             //adding the created satellites to our scene                                 
-    });     
+    // satellites.forEach(satData => {                                                     //we are looping through the sattelites object that we received from the backend here
+    //   const satGeometry = new THREE.SphereGeometry(0.05, 8, 8);                         //here we are giving the shape of the satellites i.e 0.5 radius circles
+    //   const satMaterial = new THREE.MeshBasicMaterial({ color: satData.color });        //color that is stored inside satellites.color
+    //   const satellite = new THREE.Mesh(satGeometry, satMaterial);                       //combining the shape and the color
+    //   satelliteObjects.push(satellite);                                                 //adding the satellite to the satellite array here this would be used later for animating the satellites
+    //   scene.add(satellite);                                                             //adding the created satellites to our scene                                 
+    // });     
+
+
+    satellites.forEach(sat=>scene.add(sat.mesh));
+
+
 
     // --- Controls ---
     const controls = new OrbitControls(camera, renderer.domElement);                    //cursor controls
@@ -134,75 +208,141 @@ export default function HomePage() {
     camera.position.z = 5;
 
     // --- Animation loop ---
-    const animate = () => {
+    
+
+
+//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
+
+
+        // // Animate satellites based on the fetched data
+        // satelliteObjects.forEach((sat, index) => {
+        //     const satData = satellites[index];
+        //     const time = Date.now() * 0.0001 * satData.orbit.speed;                    //here we are setting the speed of each satellite
+            
+        //     sat.position.x = Math.cos(time) * satData.orbit.radius;                    //setting the radius of each satellite's orbit
+        //     sat.position.z = Math.sin(time) * satData.orbit.radius;
+            
+        //     // Apply the tilt (inclination)
+        //     // const orbitPlane = new THREE.Object3D();                                  //since each satellite is now in the x-z plane we are setting the inclination here to separate each of their orbits through inlcination on the x-axis
+        //     // orbitPlane.rotation.x = satData.orbit.inclination;                        //get the x-inclination from satellites.orbit.inclination
+        //     // sat.position.applyEuler(orbitPlane.rotation);                             // this statement applies the different orbital tilts
+        // });
+
+
+
+        // //Collision detection logic---
+
+        // const collisionThreshold = 0.5;                                               //if satellites get closer than this, we'll flag them as red
+
+        // satelliteObjects.forEach((sat, index) => {
+        //   (sat.material as THREE.MeshBasicMaterial).color.set(satellites[index].color);     //resetting each satellite to their original color first
+        // });
+
+        // //we are resetting color to original because we want the color of the satellites to be red only for the time they are below distanceThreshold in closeness
+        // //because the animate function keeps them moving, we keep resetting them to original color and keep on checking their distance by looping through the satelliteObject array
+        // //if they move further away then we set their color to original and the if condition of the color setting doesnt run and the satellites return to their original color
+
+
+
+
+
+
+        // //now looping through each satellite and findind distance between them each time the animate functions runs(60 times per second)
+
+        // for(let i=0;i<satelliteObjects.length;i++){
+        //   for(let j=i+1;j<satelliteObjects.length;j++){
+        //     const sat1 = satelliteObjects[i];
+        //     const sat2 = satelliteObjects[j];
+
+        //     // calculate distance
+        //     const distance = sat1.position.distanceTo(sat2.position); 
+
+        //     if(distance<collisionThreshold){
+        //       (sat1.material as THREE.MeshBasicMaterial).color.set('red');      //setting both their colors red if the distance is less than threshold
+        //       (sat2.material as THREE.MeshBasicMaterial).color.set('red');
+        //     }
+
+
+        //   }
+        // }
+
+
+        //animate function for dummy satellites that we fed through the backend earlier
+//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
+
+
+
+//        NEW ANIMATE FUNCTION LOGIC
+const animate = () => {
         requestAnimationFrame(animate);
         earth.rotation.y += 0.001;
 
-        // Animate satellites based on the fetched data
-        satelliteObjects.forEach((sat, index) => {
-            const satData = satellites[index];
-            const time = Date.now() * 0.0001 * satData.orbit.speed;                    //here we are setting the speed of each satellite
-            
-            sat.position.x = Math.cos(time) * satData.orbit.radius;                    //setting the radius of each satellite's orbit
-            sat.position.z = Math.sin(time) * satData.orbit.radius;
-            
-            // Apply the tilt (inclination)
-            // const orbitPlane = new THREE.Object3D();                                  //since each satellite is now in the x-z plane we are setting the inclination here to separate each of their orbits through inlcination on the x-axis
-            // orbitPlane.rotation.x = satData.orbit.inclination;                        //get the x-inclination from satellites.orbit.inclination
-            // sat.position.applyEuler(orbitPlane.rotation);                             // this statement applies the different orbital tilts
-        });
 
+        // console.log('Loaded satellites:', satellites.map(s => s.name));
 
+time += satelliteSpeed;
 
-        //Collision detection logic---
+const now = new Date(time);
+satellites.forEach(sat=>{
+  
+  const positionAndVelocity = satellite.propagate(sat.satrec,now);        //this function takes  satellite's satrec physics model and current time and performs complex SGP4 calculations and returns the positon and velocity of the satellite at this moment
 
-        const collisionThreshold = 0.5;                                               //if satellites get closer than this, we'll flag them as red
+ 
 
-        satelliteObjects.forEach((sat, index) => {
-          (sat.material as THREE.MeshBasicMaterial).color.set(satellites[index].color);     //resetting each satellite to their original color first
-        });
+  const positionEci = positionAndVelocity?.position;      
 
-        //we are resetting color to original because we want the color of the satellites to be red only for the time they are below distanceThreshold in closeness
-        //because the animate function keeps them moving, we keep resetting them to original color and keep on checking their distance by looping through the satelliteObject array
-        //if they move further away then we set their color to original and the if condition of the color setting doesnt run and the satellites return to their original color
-
-
-
-
-
-
-        //now looping through each satellite and findind distance between them each time the animate functions runs(60 times per second)
-
-        for(let i=0;i<satelliteObjects.length;i++){
-          for(let j=i+1;j<satelliteObjects.length;j++){
-            const sat1 = satelliteObjects[i];
-            const sat2 = satelliteObjects[j];
-
-            // calculate distance
-            const distance = sat1.position.distanceTo(sat2.position); 
-
-            if(distance<collisionThreshold){
-              (sat1.material as THREE.MeshBasicMaterial).color.set('red');      //setting both their colors red if the distance is less than threshold
-              (sat2.material as THREE.MeshBasicMaterial).color.set('red');
+  //this function extract the x,y,z coordinates of the satellite in ECI(earth centric inertial system)
+  const gmst = satellite.gstime(now);
+  if(positionEci){
+    const positionEcf = satellite.eciToEcf(positionEci,gmst);
+  
+                const scale = (1 / 6371) * 2;           //we are setting scale positionEci gives us data in real world kilometers
+                //we have to scale down it to fit into our 3d scene     we have taken our earth's radius to be 1 and real earth's radius is 6371 km so to scale properly we have to bring the coordinates into our system of calculation                     
+                sat.mesh.position.set(                            //finally we muliply x,y,z coordinates by our scale factor to fit them into our scene 
+                    positionEcf.x * scale,  
+                    positionEcf.z * scale,                        //in ECI system, Z coordinate is actually the Y coordinate in three.js coordinate system so we set Y coordinate to the Z in ECI
+                    -positionEcf.y * scale                        //we swap Y and Z axis and multiply it by -1 to correct the orientation accoriding to our camera
+                );
             }
-
-
-          }
-        }
-
-
-
-        controls.update();
+        });
+       controls.update();
         renderer.render(scene, camera);
         //rendered takes the snapshot of our scene at this exact moment and shows it to us(draws it on the screen) this happens 60 times per second which gives us the illusion of animation
     };
+        
     animate();
 
-    // --- Cleanup ---
+
+     // --- Cleanup ---
     return () => {
         currentMount.removeChild(renderer.domElement);
     };
-  }, [satellites]);                                                   //This code only runs when satellite state has some data i.e either a satellite is added or our frontend gets the satellite data that it has fetched from the backend in the previous useEffect
+  }, [satellites.length,satelliteSpeed]);                                                   //This code only runs when satellite state has some data i.e either a satellite is added or our frontend gets the satellite data that it has fetched from the backend in the previous useEffect
 
-  return <div ref={mountRef} className="w-full h-screen" />;
+  return( <div ref={mountRef} className="w-full h-screen" >
+         <div className="fixed top-4 left-4 bg-white rounded p-2 shadow">
+        <label>Speed: {satelliteSpeed} sec/frame</label>
+        <input
+          type="range"
+          min="1"
+          max="1000"
+          value={satelliteSpeed}
+          onChange={(e) => setSatelliteSpeed(Number(e.target.value))}
+        />
+      </div>
+
+  </div>
+  );
 }
+
+
+
+
+
+
+
+        
+    
+   
