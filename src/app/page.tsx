@@ -75,7 +75,7 @@ export default function HomePage() {
     scene.add(pointLight);
 
 
-    
+
     //we did not give any coordinates to our main actor(earth) so it is by default placed at (0,0,0) i.e the center of our stage
 
 
@@ -86,7 +86,10 @@ export default function HomePage() {
 
 
     // --- 4. DYNAMIC Satellites & Orbits ---
-    const satelliteObjects: THREE.Mesh[] = [];                                    
+    const satelliteObjects: THREE.Mesh[] = [];                                          //array to store satellites from fetched from our backend 
+    
+    
+
     satellites.forEach(satData => {                                                     //we are looping through the sattelites object that we received from the backend here
       const satGeometry = new THREE.SphereGeometry(0.05, 8, 8);                         //here we are giving the shape of the satellites i.e 0.5 radius circles
       const satMaterial = new THREE.MeshBasicMaterial({ color: satData.color });        //color that is stored inside satellites.color
@@ -114,10 +117,50 @@ export default function HomePage() {
             sat.position.z = Math.sin(time) * satData.orbit.radius;
             
             // Apply the tilt (inclination)
-            const orbitPlane = new THREE.Object3D();                                  //since each satellite is now in the x-z plane we are setting the inclination here to separate each of their orbits through inlcination on the x-axis
-            orbitPlane.rotation.x = satData.orbit.inclination;                        //get the x-inclination from satellites.orbit.inclination
-            sat.position.applyEuler(orbitPlane.rotation);                             // this statement applies the different orbital tilts
+            // const orbitPlane = new THREE.Object3D();                                  //since each satellite is now in the x-z plane we are setting the inclination here to separate each of their orbits through inlcination on the x-axis
+            // orbitPlane.rotation.x = satData.orbit.inclination;                        //get the x-inclination from satellites.orbit.inclination
+            // sat.position.applyEuler(orbitPlane.rotation);                             // this statement applies the different orbital tilts
         });
+
+
+
+        //Collision detection logic---
+
+        const collisionThreshold = 0.5;                                               //if satellites get closer than this, we'll flag them as red
+
+        satelliteObjects.forEach((sat, index) => {
+          (sat.material as THREE.MeshBasicMaterial).color.set(satellites[index].color);     //resetting each satellite to their original color first
+        });
+
+        //we are resetting color to original because we want the color of the satellites to be red only for the time they are below distanceThreshold in closeness
+        //because the animate function keeps them moving, we keep resetting them to original color and keep on checking their distance by looping through the satelliteObject array
+        //if they move further away then we set their color to original and the if condition of the color setting doesnt run and the satellites return to their original color
+
+
+
+
+
+
+        //now looping through each satellite and findind distance between them each time the animate functions runs(60 times per second)
+
+        for(let i=0;i<satelliteObjects.length;i++){
+          for(let j=i+1;j<satelliteObjects.length;j++){
+            const sat1 = satelliteObjects[i];
+            const sat2 = satelliteObjects[j];
+
+            // calculate distance
+            const distance = sat1.position.distanceTo(sat2.position); 
+
+            if(distance<collisionThreshold){
+              (sat1.material as THREE.MeshBasicMaterial).color.set('red');      //setting both their colors red if the distance is less than threshold
+              (sat2.material as THREE.MeshBasicMaterial).color.set('red');
+            }
+
+
+          }
+        }
+
+
 
         controls.update();
         renderer.render(scene, camera);

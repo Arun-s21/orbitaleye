@@ -13,11 +13,11 @@ export async function GET(){
 
             id:'sat1',
             name:'satellite alpha',
-            color:'red',
+            color:'gray',
             orbit:{
                 radius:1.5,
                 speed:0.8,
-                inclination:0.2,            //tilt on the x-axis
+                inclination:0.1,            //tilt on the x-axis
             },
 
 
