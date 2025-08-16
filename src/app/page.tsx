@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import axios from 'axios';
+import satellite from 'satellite.js';
+
 
 // Define a type for our satellite data to make the code safer
 type Satellite = {
@@ -17,12 +19,31 @@ type Satellite = {
   };
 };
 
+type SatelliteObject = {
+
+  mesh:THREE.Mesh;        //what is THREE.mesh ?
+  satrec:any;             //satellite record from satellite.js
+  name:string;  
+}
+
 export default function HomePage() {
   const mountRef = useRef<HTMLDivElement>(null);
   // 1. New state to store our satellite data
   const [satellites, setSatellites] = useState<Satellite[]>([]);
 
+
+  
+
+
+
+
+
   // 2. This useEffect fetches the data from our API
+
+  //Fetching the tle set data from our backend, rn its raw text we will have to parse it
+  //data has three lines--name,its orbit varying data and its orbit parameters
+  //we will have to split data into individual lines of array
+  //then for each satellite read its next two lines and process that data
   useEffect(() => {
     const fetchSatelliteData = async () => {
       try {
@@ -34,6 +55,15 @@ export default function HomePage() {
     };
     fetchSatelliteData();
   }, []); // Runs once on page load to fetch the satellite data present at the backend
+
+
+
+
+
+
+
+
+
 
   // 3. This useEffect builds the 3D scene *after* we have the data
   useEffect(() => {
