@@ -35,6 +35,17 @@ function makeTextSprite(message: string) {                              //functi
 
 
 
+type CollisionAlert = {
+  sat1: string;                               //type for out collision alert state variable
+  sat2: string;
+  distance: number;
+} | null;
+
+
+
+
+
+
 
 type SatelliteObject = {
 
@@ -55,7 +66,7 @@ export default function HomePage() {
   // 1. New state to store our satellite data
   const [satellites, setSatellites] = useState<SatelliteObject[]>([]);        //empty array for now with type as above defined satelliteObject
   const[satelliteSpeed,setSatelliteSpeed] = useState(60);                     //new state to make the slider component to adjust satellite speed from the client side
-
+  const [collision,setCollision] = useState<CollisionAlert>(null);
   
 
 
@@ -208,6 +219,22 @@ export default function HomePage() {
     const pointLight = new THREE.PointLight(0xffffff, 1);
     pointLight.position.set(5, 3, 5);
     scene.add(pointLight);
+
+    const starGeometry = new THREE.BufferGeometry();                        //for stars we create a huge hollow sphere of tiny dots and placing out cmaera inside it 
+    const starVertices = [];
+    for (let i = 0; i < 10000; i++) {
+        const x = (Math.random() - 0.5) * 2000;                           //In each loop, we generate a random X, Y, and Z coordinate and add it to a simple array. This creates a cloud of random points.
+        const y = (Math.random() - 0.5) * 2000;
+        const z = (Math.random() - 0.5) * 2000;
+        starVertices.push(x, y, z);
+    }
+    starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));               //This takes our array of coordinates and attaches it to our geometry container.
+
+
+    const starMaterial = new THREE.PointsMaterial({ color: 'white', size: 0.1 });                           //This defines the appearance of each point (a small, white dot).
+    const stars = new THREE.Points(starGeometry, starMaterial);                     //This combines the geometry (the positions) and the material (the appearance) to create the final starfield object, which we then add to our scene.
+    scene.add(stars); 
+
 
 
 
@@ -379,7 +406,7 @@ satellites.forEach(sat=>{
 
         const collisionThreshold = 0.5;        //the least distance satellites can come close to each other before getting flagged red 
 
-
+        let collisionDetected = false;
 
         satellites.forEach(sat => {
           (sat.mesh.material as THREE.MeshBasicMaterial).color.set(sat.originalColor);      //every frame revert the satellites back to their original color and check if they still are in the danger zone or not                                                                              
@@ -399,8 +426,26 @@ satellites.forEach(sat=>{
             if (distance < collisionThreshold) {
               (sat1.mesh.material as THREE.MeshBasicMaterial).color.set('red');
               (sat2.mesh.material as THREE.MeshBasicMaterial).color.set('red');
+
+              //update the collision variable if collision is detected
+              setCollision({
+                sat1:sat1.name,
+                sat2:sat2.name,
+                distance:distance
+              });
+
+              collisionDetected=true;
+              
+
+
+
             }
           }
+        }
+
+
+          if (!collisionDetected) {
+          setCollision(null);
         }
 
 
@@ -425,23 +470,43 @@ satellites.forEach(sat=>{
         currentMount.removeChild(renderer.domElement);
     };
   }, [satellites.length,satelliteSpeed]);                                                   //This code only runs when satellite state has some data i.e either a satellite is added or our frontend gets the satellite data that it has fetched from the backend in the previous useEffect
+return (
+    <div className="relative w-full h-screen">
+      {/* This is your 3D scene canvas */}
+      <div ref={mountRef} className="w-full h-full" />
 
-  return( <div ref={mountRef} className="w-full h-screen" >
-         <div className="fixed top-4 left-4 bg-white rounded p-2 shadow">
-        <label>Speed: {satelliteSpeed} sec/frame</label>
-        <input
-          type="range"
-          min="1"
-          max="1000"
-          value={satelliteSpeed}
-          onChange={(e) => setSatelliteSpeed(Number(e.target.value))}
-        />
+      {/* This div is for your UI overlays */}
+      <div>
+        {/* The speed slider (correctly on the top-left) */}
+        <div className="fixed top-4 left-4 bg-white/70 backdrop-blur-sm rounded p-2 shadow">
+          <label className="text-sm font-semibold">Speed Multiplier: {satelliteSpeed}x</label>
+          <input
+            type="range"
+            min="1"
+            max="1000"
+            value={satelliteSpeed}
+            onChange={(e) => setSatelliteSpeed(Number(e.target.value))}
+            className="w-full"
+          />
+        </div>
+
+        {/* The collision alert */}
+        {collision && (
+          // THE FIX: Changed positioning classes to place it on the top-right
+          <div className="absolute top-4 right-4 bg-red-500/80 text-white p-4 rounded-lg shadow-lg backdrop-blur-sm">
+            <h3 className="font-bold text-lg">⚠️ Collision Alert!</h3>
+            <p className="text-sm">
+              {collision.sat1} and {collision.sat2} are too close!
+            </p>
+            <p className="text-xs mt-1">
+              Distance: {collision.distance.toFixed(2)} units
+            </p>
+          </div>
+        )}
       </div>
-
-  </div>
+    </div>
   );
 }
-
 
 
 
