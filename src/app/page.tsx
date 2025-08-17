@@ -472,7 +472,7 @@ satellites.forEach(sat=>{
   }, [satellites.length,satelliteSpeed]);                                                   //This code only runs when satellite state has some data i.e either a satellite is added or our frontend gets the satellite data that it has fetched from the backend in the previous useEffect
 return (
     <div className="relative w-full h-screen">
-      {/* This is your 3D scene canvas */}
+     
       <div ref={mountRef} className="w-full h-full" />
 
       {/* This div is for your UI overlays */}
@@ -492,7 +492,7 @@ return (
 
         {/* The collision alert */}
         {collision && (
-          // THE FIX: Changed positioning classes to place it on the top-right
+          
           <div className="absolute top-4 right-4 bg-red-500/80 text-white p-4 rounded-lg shadow-lg backdrop-blur-sm">
             <h3 className="font-bold text-lg">⚠️ Collision Alert!</h3>
             <p className="text-sm">
