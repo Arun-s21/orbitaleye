@@ -5,8 +5,6 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import axios from 'axios';
 import * as satellite from 'satellite.js';
-let time = Date.now();
-
 
 // Define a type for our satellite data to make the code safer
 // type Satellite = {
@@ -34,7 +32,7 @@ export default function HomePage() {
   const mountRef = useRef<HTMLDivElement>(null);
   // 1. New state to store our satellite data
   const [satellites, setSatellites] = useState<SatelliteObject[]>([]);
-  const[satelliteSpeed,setSatelliteSpeed] = useState(60);
+  const[satelliteSpeed,setSatelliteSpeed] = useState(60);                     //new state to make the slider component to adjust satellite speed from the client side
 
   
 
@@ -272,7 +270,9 @@ export default function HomePage() {
 //------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------
 
-
+ const startTime = Date.now();              //this variable stores the starting time(seconds) of the animation loop, it gives us a starting point to start our measurements from
+ //new Date() gives us the miliseconds that has passed since 1970 which is a very huge number so we have to get the differnce of startTime and elapsedTime in the animation loop
+    
 
 //        NEW ANIMATE FUNCTION LOGIC
 const animate = () => {
@@ -282,13 +282,35 @@ const animate = () => {
 
         // console.log('Loaded satellites:', satellites.map(s => s.name));
 
-time += satelliteSpeed;
+const currentTime = Date.now();
+//this line gets the exact miliseconds at every frame of the animation
 
-const now = new Date(time);
+
+const elapsedTime = (currentTime-startTime)/1000;       //time in seconds
+const now = new Date(startTime + (elapsedTime*satelliteSpeed*1000));                                  //satellite.js needs a date object to calculate at which point in time to calculate the satellite's position etc so we need to create a date object 
+//real time is 24 hours in a day but we need the clock to work faster so that satellites can move faster(animate function makes sure entire motion is completed in minutes)
+
+//we are adding startTime because if we dont add the startTime the elapsedTime would be 0 when the first time animation loads since currentTime=startTime then const now =0
+//this will create a new date object like new Date(0) which means it would give us a time in 1970, we are using the tle data of 2025, satellite.propagate function would then be asked to 
+//calculate the satellite position in 1970 which would break the function
+//so we add startTime so that the position of the satellite is always currentTime+minutesPassedInSimulation
+//everytime animation function runs, it takes a new snapshot of the satellite positions according to the now date object and we can adjust the elapsedTime by adjusting the slider
+
+
+//new Date(0) gives us a date object when we call it we are telling js to give us a date object exactly 0 milliseconds after 1 january 1970 which would be the 1970 date itself
+
+
+
+//elapsedTIme*satelliteSpeed means lets say elapsed time=10 second and satellite speed =60 then we are telling our simulation that actually 600 seconds have passed inside the simulation *1000 turns it into milliseconds
+
+
+
+
+
 satellites.forEach(sat=>{
   
   const positionAndVelocity = satellite.propagate(sat.satrec,now);        //this function takes  satellite's satrec physics model and current time and performs complex SGP4 calculations and returns the positon and velocity of the satellite at this moment
-
+//Based on this satellite's orbital recipe (satrec), where in the sky would it be at the exact moment in time represented by this Date object (now)?"
  
 
   const positionEci = positionAndVelocity?.position;      
