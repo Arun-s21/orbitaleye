@@ -25,13 +25,14 @@ type SatelliteObject = {
 
 
   satrec:any;             //satellite record from satellite.js, it is a special object that contains a function that performs all the complex math operations on the satellite data to give its orbit and other details
-  name:string;  
+  name:string; 
+  originalColor:THREE.Color;                      //to remember the color of each satellite to reinstate after satellites move away from danger zone 
 }
 
 export default function HomePage() {
   const mountRef = useRef<HTMLDivElement>(null);
   // 1. New state to store our satellite data
-  const [satellites, setSatellites] = useState<SatelliteObject[]>([]);
+  const [satellites, setSatellites] = useState<SatelliteObject[]>([]);        //empty array for now with type as above defined satelliteObject
   const[satelliteSpeed,setSatelliteSpeed] = useState(60);                     //new state to make the slider component to adjust satellite speed from the client side
 
   
@@ -57,15 +58,18 @@ export default function HomePage() {
         const satelliteData = response.data.satellites;
 
         const processedSatellites = satelliteData.map((sat: any) => {
+          const color = new THREE.Color(Math.random() * 0xffffff);
+
+
           // Create the physics model from the provided lines
           const satrec = satellite.twoline2satrec(sat.tleLine1, sat.tleLine2);
           return {
             mesh: new THREE.Mesh(
               new THREE.SphereGeometry(0.05, 8, 8),
-              new THREE.MeshBasicMaterial({ color: Math.random() * 0xffffff })),
+              new THREE.MeshBasicMaterial({ color: color})),                //set a random color for each satellite in the scene
             satrec,
             name: sat.name,
-            
+            originalColor:color
           };
         });
 
@@ -313,14 +317,19 @@ satellites.forEach(sat=>{
 //Based on this satellite's orbital recipe (satrec), where in the sky would it be at the exact moment in time represented by this Date object (now)?"
  
 
-  const positionEci = positionAndVelocity?.position;      
+  const positionEci = positionAndVelocity?.position;   
+     
 
-  //this function extract the x,y,z coordinates of the satellite in ECI(earth centric inertial system)
+  //this function extract the x,y,z coordinates of the satellite in ECI(earth centric inertial system)--- "fixed" coordinate system where the stars don't move. The Earth spins inside this fixed grid
+
   const gmst = satellite.gstime(now);
+  //this is the current rotation angle of the Earth. It's the key piece of information needed to switch between the two coordinate systems
+
   if(positionEci){
     const positionEcf = satellite.eciToEcf(positionEci,gmst);
+    //coordinate system that is glued to the Earth and spins with it. A point on the surface (like your city) has a fixed coordinate in this system
   
-                const scale = (1 / 6371) * 2;           //we are setting scale positionEci gives us data in real world kilometers
+                const scale = (1 / 6371)*2;           //we are setting scale positionEci gives us data in real world kilometers
                 //we have to scale down it to fit into our 3d scene     we have taken our earth's radius to be 1 and real earth's radius is 6371 km so to scale properly we have to bring the coordinates into our system of calculation                     
                 sat.mesh.position.set(                            //finally we muliply x,y,z coordinates by our scale factor to fit them into our scene 
                     positionEcf.x * scale,  
@@ -329,6 +338,46 @@ satellites.forEach(sat=>{
                 );
             }
         });
+
+
+
+        //COLLISION DETECTION LOGIC----------------------
+
+        const collisionThreshold = 0.5;        //the least distance satellites can come close to each other before getting flagged red 
+
+
+
+        satellites.forEach(sat => {
+          (sat.mesh.material as THREE.MeshBasicMaterial).color.set(sat.originalColor);      //every frame revert the satellites back to their original color and check if they still are in the danger zone or not                                                                              
+        });      
+        
+        
+        // Now Loop through every unique pair of satellites
+        for (let i = 0; i < satellites.length; i++) {
+          for (let j = i + 1; j < satellites.length; j++) {
+            const sat1 = satellites[i];
+            const sat2 = satellites[j];
+
+            //Calculate the distance between them
+            const distance = sat1.mesh.position.distanceTo(sat2.mesh.position);
+
+            // 4. If the distance is below the threshold, flag them as red
+            if (distance < collisionThreshold) {
+              (sat1.mesh.material as THREE.MeshBasicMaterial).color.set('red');
+              (sat2.mesh.material as THREE.MeshBasicMaterial).color.set('red');
+            }
+          }
+        }
+
+
+
+
+
+
+
+
+
+
        controls.update();
         renderer.render(scene, camera);
         //rendered takes the snapshot of our scene at this exact moment and shows it to us(draws it on the screen) this happens 60 times per second which gives us the illusion of animation
