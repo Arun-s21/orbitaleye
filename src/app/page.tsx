@@ -38,14 +38,16 @@ function makeTextSprite(message: string) {                              //functi
 
 type SatelliteObject = {
 
-  mesh:THREE.Mesh;        //what is THREE.mesh ?
+  mesh:THREE.Mesh;        //what is THREE.mesh ?It is a regular 3d object
   // A THREE.Mesh is the most common type of object in Three.js. It's simply an object that has a shape (a Geometry) and an appearance (a Material). It's the final, visible "actor" that you place on the stage.
 
 
   satrec:any;             //satellite record from satellite.js, it is a special object that contains a function that performs all the complex math operations on the satellite data to give its orbit and other details
   name:string; 
   originalColor:THREE.Color;                      //to remember the color of each satellite to reinstate after satellites move away from danger zone 
-  label:THREE.Sprite;                             //adding the property to give each satellite its label(name)
+  label:THREE.Sprite;                             // THREE.Sprite is a special type of object in Three.js that is a 2D plane that always faces the camera.
+
+
 }
 
 export default function HomePage() {
