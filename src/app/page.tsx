@@ -18,6 +18,24 @@ import * as satellite from 'satellite.js';
 //   };
 // };
 
+
+function makeTextSprite(message: string) {                              //function to give labels(names) to each satellite, we are using Three.Sprite 
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d")!;
+  context.font = "24px Arial";
+  context.fillStyle = "white";
+  context.fillText(message, 4, 24);       
+
+  const texture = new THREE.CanvasTexture(canvas);
+  const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+  const sprite = new THREE.Sprite(material);
+  sprite.scale.set(0.5, 0.25, 1); // adjust size
+  return sprite;
+}
+
+
+
+
 type SatelliteObject = {
 
   mesh:THREE.Mesh;        //what is THREE.mesh ?
@@ -27,6 +45,7 @@ type SatelliteObject = {
   satrec:any;             //satellite record from satellite.js, it is a special object that contains a function that performs all the complex math operations on the satellite data to give its orbit and other details
   name:string; 
   originalColor:THREE.Color;                      //to remember the color of each satellite to reinstate after satellites move away from danger zone 
+  label:THREE.Sprite;                             //adding the property to give each satellite its label(name)
 }
 
 export default function HomePage() {
@@ -57,19 +76,32 @@ export default function HomePage() {
         const response = await axios.get('/api/orbits');
         const satelliteData = response.data.satellites;
 
+        //creating satellite meshes now-------
         const processedSatellites = satelliteData.map((sat: any) => {
           const color = new THREE.Color(Math.random() * 0xffffff);
 
+          const mesh = new THREE.Mesh(
+            new THREE.SphereGeometry(0.05, 16, 16),
+            new THREE.MeshBasicMaterial({ color: color })                       //set a random color for each satellite in the scene
+          );
 
           // Create the physics model from the provided lines
           const satrec = satellite.twoline2satrec(sat.tleLine1, sat.tleLine2);
+
+          // Create a 3D label for each satellite using your new function
+          const label = makeTextSprite(sat.name);
+          label.position.set(0, 0.1, 0); // Position it slightly above the satellite
+          mesh.add(label); // Attach the label as a child of the satellite mesh
+
+
+
+
           return {
-            mesh: new THREE.Mesh(
-              new THREE.SphereGeometry(0.05, 8, 8),
-              new THREE.MeshBasicMaterial({ color: color})),                //set a random color for each satellite in the scene
+            mesh,
             satrec,
             name: sat.name,
-            originalColor:color
+            originalColor:color,
+            label
           };
         });
 
