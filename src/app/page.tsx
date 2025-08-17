@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import axios from 'axios';
 import * as satellite from 'satellite.js';
+import { AxiosError } from 'axios';
 
 // Define a type for our satellite data to make the code safer
 // type Satellite = {
@@ -52,7 +53,7 @@ type SatelliteObject = {
   mesh:THREE.Mesh;        //what is THREE.mesh ?It is a regular 3d object
   // A THREE.Mesh is the most common type of object in Three.js. It's simply an object that has a shape (a Geometry) and an appearance (a Material). It's the final, visible "actor" that you place on the stage.
 
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   satrec:any;             //satellite record from satellite.js, it is a special object that contains a function that performs all the complex math operations on the satellite data to give its orbit and other details
   name:string; 
   originalColor:THREE.Color;                      //to remember the color of each satellite to reinstate after satellites move away from danger zone 
@@ -90,6 +91,7 @@ export default function HomePage() {
         const satelliteData = response.data.satellites;
 
         //creating satellite meshes now-------
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const processedSatellites = satelliteData.map((sat: any) => {
           const color = new THREE.Color(Math.random() * 0xffffff);
 
@@ -157,10 +159,11 @@ export default function HomePage() {
 
 
 
-      } catch(error){
-        console.error('Failed to fetch satellite data: ',error);
+      } catch (err) {
+        // FIX: Use a specific type for the error
+        const error = err as AxiosError;
+        console.error("Failed to fetch satellite data:", error.message);
       }
-
 
 
     };
@@ -469,7 +472,7 @@ satellites.forEach(sat=>{
     return () => {
         currentMount.removeChild(renderer.domElement);
     };
-  }, [satellites.length,satelliteSpeed]);                                                   //This code only runs when satellite state has some data i.e either a satellite is added or our frontend gets the satellite data that it has fetched from the backend in the previous useEffect
+  }, [satellites,satelliteSpeed]);                                                   //This code only runs when satellite state has some data i.e either a satellite is added or our frontend gets the satellite data that it has fetched from the backend in the previous useEffect
 return (
     <div className="relative w-full h-screen">
      
