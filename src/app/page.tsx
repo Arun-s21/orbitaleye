@@ -499,7 +499,7 @@ return (
               {collision.sat1} and {collision.sat2} are too close!
             </p>
             <p className="text-xs mt-1">
-              Distance: {collision.distance.toFixed(2)} units
+              Distance: {collision.distance.toFixed(2)} units               {/*toFixed makes sure we only get two decimal places value*/}
             </p>
           </div>
         )}
