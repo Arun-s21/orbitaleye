@@ -217,11 +217,25 @@ export default function HomePage() {
   const earthMaterial = new THREE.MeshStandardMaterial({ map: earthTexture });
     const earth = new THREE.Mesh(earthGeometry, earthMaterial);
     scene.add(earth);
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);                         //ambient light makes the earth appear and look brighter
     scene.add(ambientLight);
-    const pointLight = new THREE.PointLight(0xffffff, 1);
-    pointLight.position.set(5, 3, 5);
-    scene.add(pointLight);
+    
+    
+  const sunGeometry = new THREE.SphereGeometry(10, 32, 32);
+  const sunTexture = new THREE.TextureLoader().load(
+    '/sunTexture.jpg'
+  );
+
+const sunMaterial = new THREE.MeshBasicMaterial({
+  map: sunTexture});
+const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+sun.position.set(-100, 50, 100);
+scene.add(sun);
+
+
+
+
+
 
     const starGeometry = new THREE.BufferGeometry();                        //for stars we create a huge hollow sphere of tiny dots and placing out cmaera inside it 
     const starVertices = [];
@@ -474,14 +488,14 @@ satellites.forEach(sat=>{
     };
   }, [satellites,satelliteSpeed]);                                                   //This code only runs when satellite state has some data i.e either a satellite is added or our frontend gets the satellite data that it has fetched from the backend in the previous useEffect
 return (
-    <div className="relative w-full h-screen">
+    <div className="relative w-full h-screen bg-black">
      
-      <div ref={mountRef} className="w-full h-full" />
+      <div ref={mountRef} className="absolute top-0 w-full h-full" />
 
       {/* This div is for your UI overlays */}
       <div>
         {/* The speed slider (correctly on the top-left) */}
-        <div className="fixed top-4 left-4 bg-white/70 backdrop-blur-sm rounded p-2 shadow">
+        <div className="fixed top-4 left-4 bg-gray-900 bg-opacity-70 backdrop-blur-md text-gray-200 border border-gray-700 rounded p-2 shadow">
           <label className="text-sm font-semibold">Speed Multiplier: {satelliteSpeed}x</label>
           <input
             type="range"
@@ -505,7 +519,7 @@ return (
               Distance: {collision.distance.toFixed(2)} units               {/*toFixed makes sure we only get two decimal places value*/}
             </p>
           </div>
-        )}
+        )}  
       </div>
     </div>
   );
