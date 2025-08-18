@@ -212,7 +212,7 @@ export default function HomePage() {
     // --- Earth & Lighting ---
     const earthGeometry = new THREE.SphereGeometry(1, 32, 32);
      const earthTexture = new THREE.TextureLoader().load(
-    'https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg'
+    '/earthTexture.jpg'
   );
   const earthMaterial = new THREE.MeshStandardMaterial({ map: earthTexture });
     const earth = new THREE.Mesh(earthGeometry, earthMaterial);
