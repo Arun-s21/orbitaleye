@@ -228,7 +228,7 @@ export default function HomePage() {
 
 const sunMaterial = new THREE.MeshBasicMaterial({
   map: sunTexture});
-let sun = new THREE.Mesh(sunGeometry, sunMaterial);
+const sun = new THREE.Mesh(sunGeometry, sunMaterial);
 sun.position.set(-100, 50, 100);
 scene.add(sun);
 
