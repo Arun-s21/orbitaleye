@@ -19,7 +19,7 @@ import { AxiosError } from 'axios';
 //   };
 // };
 
-
+//commit example
 function makeTextSprite(message: string) {                              //function to give labels(names) to each satellite, we are using Three.Sprite 
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d")!;
