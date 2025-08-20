@@ -645,13 +645,13 @@ activeSatellites.forEach(sat=>{
         )}  
 
       <div className="absolute top-1/4 left-4 z-10"> {/* <-- Add z-10 here */}
-        <h3>Available Satellites</h3>
+        <h3 className='text-white p-1'>Available Satellites</h3>
         <ul>
             {allSatellites.map(sat => {
                 
                 return (
                     <li key={sat.name}>
-                        <button className='cursor-pointer text-white ' onClick={() => handleSatellite(sat)} >
+                        <button className='cursor-pointer text-white hover:bg-slate-500 p-1' onClick={() => handleSatellite(sat)} >
                             {sat.name}
                         </button>
                     </li>
