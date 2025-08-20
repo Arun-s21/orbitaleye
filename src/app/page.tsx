@@ -65,11 +65,86 @@ type SatelliteObject = {
 export default function HomePage() {
   const mountRef = useRef<HTMLDivElement>(null);
   // 1. New state to store our satellite data
-  const [satellites, setSatellites] = useState<SatelliteObject[]>([]);        //empty array for now with type as above defined satelliteObject
   const[satelliteSpeed,setSatelliteSpeed] = useState(60);                     //new state to make the slider component to adjust satellite speed from the client side
   const [collision,setCollision] = useState<CollisionAlert>(null);
-  
+  //for dynamic adding and removal of satellites 
+  const[allSatellites,setAllSatellites] = useState<SatelliteObject[]>([]);         //this use state holds all the satellites that the backend sends
+  const[activeSatellites,setActiveSatellites] = useState<SatelliteObject[]>([]);  //this state variable holds all the active satellites i.e satellites that the user has cliked on right now
+  const sceneRef = useRef(new THREE.Scene());                                     //whenever we add/remove satellites we dont want our entire scene to regenerate 
+  //we have to use useRef for Earth and sun also to prevent re renders everytime we add or remove a satellite, every component needs to be a useRef now
+  const earthGeometryRef = useRef(new THREE.SphereGeometry(1, 32, 32));
+  const earthTextureRef = useRef<THREE.Texture | null>(null);
 
+     
+
+  const earthMaterialRef = useRef(new THREE.MeshStandardMaterial({ map: earthTextureRef.current }));
+    const earthRef = useRef(new THREE.Mesh(earthGeometryRef.current, earthMaterialRef.current));
+
+
+    const ambientLightRef = useRef(new THREE.AmbientLight(0xffffff, 0.5));                         //ambient light makes the earth appear and look brighter
+
+
+
+  const sunGeometryRef = useRef(new THREE.SphereGeometry(10, 32, 32));
+  const sunTextureRef = useRef<THREE.Texture | null>(null);
+
+ 
+
+const sunMaterialRef = useRef(new THREE.MeshBasicMaterial({
+  map: sunTextureRef.current}));
+const sunRef = useRef(new THREE.Mesh(sunGeometryRef.current, sunMaterialRef.current));
+const starGeometryRef = useRef(new THREE.BufferGeometry());
+const starVerticesRef = useRef<number[]>([]);
+const starMaterialRef = useRef(new THREE.PointsMaterial({ color: 'white', size: 0.1 }));
+
+//we cant use useRef inside a useEFfect so we had to take the neccesary constants outside
+
+  useEffect(()=>{
+      const earthLoader = new THREE.TextureLoader();                                           //const earthMaterialRef = useRef(new THREE.MeshStandardMaterial({ map: earthTextureRef.current }));
+                                                                                              // const earthRef = useRef(new THREE.Mesh(earthGeometryRef.current, earthMaterialRef.current));
+                                                                                              // At this point, earthTextureRef.current is still null (because textures are loaded later inside useEffect).
+                                                                                              // That means your Earth mesh is created with no texture and never updated.
+
+                                                                                              // Same issue for the Sun.
+    const sunLoader = new THREE.TextureLoader();
+
+     earthLoader.load("/earthTexture.jpg", (texture) => {
+    earthTextureRef.current = texture;
+    earthMaterialRef.current.map = texture;
+    earthMaterialRef.current.needsUpdate = true;
+  });
+
+  // Load Sun texture
+  sunLoader.load("/sunTexture.jpg", (texture) => {
+    sunTextureRef.current = texture;
+    sunMaterialRef.current.map = texture;
+    sunMaterialRef.current.needsUpdate = true;
+  });
+    
+
+
+     const starGeometry =starGeometryRef.current;                         //for stars we create a huge hollow sphere of tiny dots and placing out cmaera inside it 
+    const starVertices = starVerticesRef.current;
+    for (let i = 0; i < 10000; i++) {
+        const x = (Math.random() - 0.5) * 2000;                           //In each loop, we generate a random X, Y, and Z coordinate and add it to a simple array. This creates a cloud of random points.
+        const y = (Math.random() - 0.5) * 2000;
+        const z = (Math.random() - 0.5) * 2000;
+        starVerticesRef.current.push(x, y, z);
+    }
+    starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));               //This takes our array of coordinates and attaches it to our geometry container.
+
+
+    const starMaterial = starMaterialRef.current;                           //This defines the appearance of each point (a small, white dot).
+     const stars = new THREE.Points(starGeometry, starMaterial);                     //This combines the geometry (the positions) and the material (the appearance) to create the final starfield object, which we then add to our scene.
+
+    //adding stars to our scene
+    sceneRef.current.add(stars); 
+
+
+
+
+  },[]);
+   
 
 
 
@@ -107,7 +182,7 @@ export default function HomePage() {
           const label = makeTextSprite(sat.name);
           label.position.set(0, 0.1, 0); // Position it slightly above the satellite
           mesh.add(label); // Attach the label as a child of the satellite mesh
-
+          mesh.name=sat.name;                 //we are setting each satellite geometry's name to its satellite's name this is useful when we will find the satellites using satData.name in the dynamic adding of satellites later
 
 
 
@@ -120,7 +195,7 @@ export default function HomePage() {
           };
         });
 
-        setSatellites(processedSatellites);
+        setAllSatellites(processedSatellites);          //adding all the processed(completely rendered satellites) to our state variable
 
 
 
@@ -176,7 +251,7 @@ export default function HomePage() {
   }, []); // Runs once on page load to fetch the satellite data present at the backend
 
 
-
+  
 
 
 
@@ -186,7 +261,7 @@ export default function HomePage() {
 
   // 3. This useEffect builds the 3D scene *after* we have the data
   useEffect(() => {
-    if (!mountRef.current || satellites.length === 0) return;
+    if (!mountRef.current || allSatellites.length === 0) return;
 
     const currentMount = mountRef.current;
 
@@ -203,32 +278,21 @@ export default function HomePage() {
 
 
         // --- Scene Setup ---
-    const scene = new THREE.Scene();
+    const scene =  sceneRef.current;
     const camera = new THREE.PerspectiveCamera(75, currentMount.clientWidth / currentMount.clientHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
     currentMount.appendChild(renderer.domElement);
 
     // --- Earth & Lighting ---
-    const earthGeometry = new THREE.SphereGeometry(1, 32, 32);
-     const earthTexture = new THREE.TextureLoader().load(
-    '/earthTexture.jpg'
-  );
-  const earthMaterial = new THREE.MeshStandardMaterial({ map: earthTexture });
-    const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+   
+    const earth = earthRef.current;
     scene.add(earth);
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);                         //ambient light makes the earth appear and look brighter
+    const ambientLight = ambientLightRef.current;                         //ambient light makes the earth appear and look brighter
     scene.add(ambientLight);
     
     
-  const sunGeometry = new THREE.SphereGeometry(10, 32, 32);
-  const sunTexture = new THREE.TextureLoader().load(
-    '/sunTexture.jpg'
-  );
-
-const sunMaterial = new THREE.MeshBasicMaterial({
-  map: sunTexture});
-const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+const sun = sunRef.current;
 sun.position.set(-100, 50, 100);
 scene.add(sun);
 
@@ -237,20 +301,8 @@ scene.add(sun);
 
 
 
-    const starGeometry = new THREE.BufferGeometry();                        //for stars we create a huge hollow sphere of tiny dots and placing out cmaera inside it 
-    const starVertices = [];
-    for (let i = 0; i < 10000; i++) {
-        const x = (Math.random() - 0.5) * 2000;                           //In each loop, we generate a random X, Y, and Z coordinate and add it to a simple array. This creates a cloud of random points.
-        const y = (Math.random() - 0.5) * 2000;
-        const z = (Math.random() - 0.5) * 2000;
-        starVertices.push(x, y, z);
-    }
-    starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));               //This takes our array of coordinates and attaches it to our geometry container.
 
 
-    const starMaterial = new THREE.PointsMaterial({ color: 'white', size: 0.1 });                           //This defines the appearance of each point (a small, white dot).
-    const stars = new THREE.Points(starGeometry, starMaterial);                     //This combines the geometry (the positions) and the material (the appearance) to create the final starfield object, which we then add to our scene.
-    scene.add(stars); 
 
 
 
@@ -278,7 +330,7 @@ scene.add(sun);
     // });     
 
 
-    satellites.forEach(sat=>scene.add(sat.mesh));
+   
 
 
 
@@ -348,6 +400,13 @@ scene.add(sun);
         // }
 
 
+
+
+
+
+
+
+
         //animate function for dummy satellites that we fed through the backend earlier
 //------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------
@@ -389,7 +448,7 @@ const now = new Date(startTime + (elapsedTime*satelliteSpeed*1000));            
 
 
 
-satellites.forEach(sat=>{
+activeSatellites.forEach(sat=>{
   
   const positionAndVelocity = satellite.propagate(sat.satrec,now);        //this function takes  satellite's satrec physics model and current time and performs complex SGP4 calculations and returns the positon and velocity of the satellite at this moment
 //Based on this satellite's orbital recipe (satrec), where in the sky would it be at the exact moment in time represented by this Date object (now)?"
@@ -436,16 +495,16 @@ satellites.forEach(sat=>{
 
         let collisionDetected = false;
 
-        satellites.forEach(sat => {
+        activeSatellites.forEach(sat => {
           (sat.mesh.material as THREE.MeshBasicMaterial).color.set(sat.originalColor);      //every frame revert the satellites back to their original color and check if they still are in the danger zone or not                                                                              
         });      
         
         
         // Now Loop through every unique pair of satellites
-        for (let i = 0; i < satellites.length; i++) {
-          for (let j = i + 1; j < satellites.length; j++) {
-            const sat1 = satellites[i];
-            const sat2 = satellites[j];
+        for (let i = 0; i < activeSatellites.length; i++) {
+          for (let j = i + 1; j < activeSatellites.length; j++) {
+            const sat1 = activeSatellites[i];
+            const sat2 = activeSatellites[j];
 
             //Calculate the distance between them
             const distance = sat1.mesh.position.distanceTo(sat2.mesh.position);
@@ -497,8 +556,61 @@ satellites.forEach(sat=>{
     return () => {
         currentMount.removeChild(renderer.domElement);
     };
-  }, [satellites,satelliteSpeed]);                                                   //This code only runs when satellite state has some data i.e either a satellite is added or our frontend gets the satellite data that it has fetched from the backend in the previous useEffect
-return (
+  }, [allSatellites,satelliteSpeed,activeSatellites]);                                                   //This code only runs when satellite state has some data i.e either a satellite is added or our frontend gets the satellite data that it has fetched from the backend in the previous useEffect
+
+
+
+
+  //-----------------------------Dynamically adding satellites to our scene
+
+  useEffect(()=>{
+    
+    activeSatellites.forEach(satData=>{
+      const alreadyExists = sceneRef.current.getObjectByName(satData.name);
+      if(!alreadyExists){
+        sceneRef.current.add(satData.mesh);
+
+
+
+      }
+
+
+    })
+
+
+
+
+  },[activeSatellites]);                      //whenever user clicks on a new satellite, activeSatellite changes and this useEffect runs and adds that satellite to our scene
+
+
+
+
+
+
+  //------------------------------------------------logic to add set aciveSatellites such that same satellite is not added again and again to our scene
+
+  function handleSatellite(satelliteToAdd:SatelliteObject){
+
+    let isAlreadyAcive = false;                         //keeping a flag to check if the satellite already exists in our scene or not
+    //we dont want a single satellite to get added again and again if the user clicks on it multiple times so we keep a check to make sure the satellite user is clicking doesnt exist in our scene already
+    for(let i=0;i<activeSatellites.length;i++){         //looping through each satllite present in the activeSatellite array
+      const activeSatellite = activeSatellites[i];      
+      if(activeSatellite.name === satelliteToAdd.name){   //if the current satellite in the array has the same name as the satellite we want to add 
+        isAlreadyAcive=true;                              //then set the flag to true
+        break;                                            //break the loop
+      }
+    }
+
+    if(!isAlreadyAcive){                      //if the satellite is not added i.e the flag is false 
+      setActiveSatellites([...activeSatellites,satelliteToAdd]);        //... is spread syntax which brings all the array items present in the activeSaetllies array and then appends satelliteToAdd
+    }
+
+
+  }
+
+
+
+  return (
     <div className="relative w-full h-screen bg-black">
      
       <div ref={mountRef} className="absolute top-0 w-full h-full" />
@@ -531,6 +643,22 @@ return (
             </p>
           </div>
         )}  
+
+      <div className="absolute top-1/4 left-4 z-10"> {/* <-- Add z-10 here */}
+        <h3>Available Satellites</h3>
+        <ul>
+            {allSatellites.map(sat => {
+                
+                return (
+                    <li key={sat.name}>
+                        <button className='cursor-pointer text-white ' onClick={() => handleSatellite(sat)} >
+                            {sat.name}
+                        </button>
+                    </li>
+                );
+            })}
+        </ul>
+    </div>
       </div>
     </div>
   );
