@@ -69,7 +69,7 @@ export default function HomePage() {
   const [collision,setCollision] = useState<CollisionAlert>(null);
   //for dynamic adding and removal of satellites 
   const[allSatellites,setAllSatellites] = useState<SatelliteObject[]>([]);         //this use state holds all the satellites that the backend sends
-  const[activeSatellites,setActiveSatellites] = useState<SatelliteObject[]>([]);  //this state variable holds all the active satellites i.e satellites that the user has cliked on right now
+  const[activeSatellites,setActiveSatellites] = useState<SatelliteObject[]>([]);  //this state variable holds all the active satellites i.e satellites that the user has cliked on right nown
   const sceneRef = useRef(new THREE.Scene());                                     //whenever we add/remove satellites we dont want our entire scene to regenerate 
   //we have to use useRef for Earth and sun also to prevent re renders everytime we add or remove a satellite, every component needs to be a useRef now
   const earthGeometryRef = useRef(new THREE.SphereGeometry(1, 32, 32));
@@ -605,6 +605,17 @@ activeSatellites.forEach(sat=>{
       setActiveSatellites([...activeSatellites,satelliteToAdd]);        //... is spread syntax which brings all the array items present in the activeSaetllies array and then appends satelliteToAdd
     }
 
+    if(isAlreadyAcive){                     //if the satellite is already in the scene i.e active then remove that satellite
+      
+      setActiveSatellites(activeSatellites.filter(
+        (active)=>active.name!==satelliteToAdd.name
+      ));
+      const objectToRemove = sceneRef.current.getObjectByName(satelliteToAdd.name);
+    if (objectToRemove) {
+      sceneRef.current.remove(objectToRemove);
+    }
+
+    }
 
   }
 
@@ -643,22 +654,29 @@ activeSatellites.forEach(sat=>{
             </p>
           </div>
         )}  
+<div className="absolute top-1/4 left-4 z-10">
+  <h3 className="text-white p-1">Currently Available Satellites</h3>
+  <h4 className="text-white p-1">Click on each to see their path and behavior</h4>
 
-      <div className="absolute top-1/4 left-4 z-10"> {/* <-- Add z-10 here */}
-        <h3 className='text-white p-1'>Available Satellites</h3>
-        <ul>
-            {allSatellites.map(sat => {
-                
-                return (
-                    <li key={sat.name}>
-                        <button className='cursor-pointer text-white hover:bg-slate-500 p-1' onClick={() => handleSatellite(sat)} >
-                            {sat.name}
-                        </button>
-                    </li>
-                );
-            })}
-        </ul>
-    </div>
+  <ul>
+  {allSatellites.map(sat => {
+    const isActive = activeSatellites.some(active => active.name === sat.name);         //check each element from allSatellites if it exists in activeSatellites also if yes then set isActive to true 
+
+    return (
+      <li key={sat.name}>
+        <button
+          onClick={() => handleSatellite(sat)}                                  
+          className={`cursor-pointer p-1 hover:bg-slate-500 ${
+            isActive ? "text-red-500" : "text-white"                              //if the current satellite from allSatellite array isActive then it should appear red else it should appear white
+          }`}
+        >
+          {sat.name}
+        </button>
+      </li>
+    );
+  })}
+</ul>
+</div>
       </div>
     </div>
   );
