@@ -175,10 +175,12 @@ const starMaterialRef = useRef(new THREE.PointsMaterial({ color: 'white', size: 
             new THREE.MeshBasicMaterial({ color: color })                       //set a random color for each satellite in the scene
           );
 
-          // Create the physics model from the provided lines
+          // Create the physics model from the provided lines-----this is an important line--------
           const satrec = satellite.twoline2satrec(sat.tleLine1, sat.tleLine2);
 
-          // Create a 3D label for each satellite using your new function
+
+
+          // Create a 3D label for each satellite using the new function
           const label = makeTextSprite(sat.name);
           label.position.set(0, 0.1, 0); // Position it slightly above the satellite
           mesh.add(label); // Attach the label as a child of the satellite mesh
@@ -199,38 +201,11 @@ const starMaterialRef = useRef(new THREE.PointsMaterial({ color: 'white', size: 
 
 
 
-
-        // const satrecs = [];                             //empty array to store all the processed satellites to add to our scene later
-
-       
-
-
-
         //     const satrec = satellite.twoline2satrec(tleLine1,tleLine2);       //this is the inbuilt function of satellite.js
         //                                                                       //it takes the raw two lines of the tle data then performs all the complex calculations to convert the data into special satrec object
 
         //     //this satrec object is the physics model that we can use to predict satellite's position at any given time 
 
-
-
-        //     satrecs.push({satrec,name});                       //add the satellite to our satrecs array
-
-        //   }
-
-
-        // }
-
-        // setSatellites(satrecs.map(s=>({
-        //   mesh:new THREE.Mesh(
-        //     new THREE.SphereGeometry(0.05,8,8),                         //creating the geometry for each satellite, gray color for each satellite for now
-        //     new THREE.MeshBasicMaterial({color:'gray'})
-
-        //   ),
-        //   satrec:s.satrec,                                              //physics model which would be used fpr calulating the position of each satellite
-        //   name:s.name,                                  
-
-
-        // })));
 
 
 
