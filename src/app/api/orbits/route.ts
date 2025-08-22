@@ -71,11 +71,11 @@ export async function GET(){
           const name = tleLines[i].trim();              //what does this trim do? 
           //The .trim() function is a standard JavaScript method for strings. Its only job is to remove any accidental whitespace (spaces, tabs, newlines) from the beginning and end of a string. We use it on the satellite's name to make sure it matches 'ISS (ZARYA)' perfectly, even if the original data had an extra space like " ISS (ZARYA) ".
 
-            // console.log(name);                   can be used to set the satellite names below, just log the names of all the satellites present at the server and copy them below into the if condition
+            //console.log(name);                   //can be used to set the satellite names below, just log the names of all the satellites present at the server and copy them below into the if condition
 
 
 
-          if(name === 'STARLINK-34571' || name ==='STARLINK-34577' || name==='STARLINK-34758' || name==='STARLINK-34647'){
+          if(name === 'STARLINK-34571' || name ==='STARLINK-34577' || name==='STARLINK-34758' || name==='STARLINK-34647' || name==='STARLINK-33782' || name==='STARLINK-11748 [DTC]'){
             const tleLine1 = tleLines[i+1].trim();             //get the next line which contains how the orbit changes due to atmospheric drag
             const tleLine2 = tleLines[i+2].trim();             //get the next to next line which contains the inclination,eccenttricity etc of the satellite
 

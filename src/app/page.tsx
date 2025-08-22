@@ -66,7 +66,7 @@ export default function HomePage() {
   const mountRef = useRef<HTMLDivElement>(null);
   // 1. New state to store our satellite data
   const[satelliteSpeed,setSatelliteSpeed] = useState(60);                     //new state to make the slider component to adjust satellite speed from the client side
-  const [collision,setCollision] = useState<CollisionAlert>(null);
+  const [collision,setCollision] = useState<CollisionAlert>(null);            //this state is defined so that when collision occurs, we save the names and distance of those two satellites in this state so that we can display the alert in the jsx using this value
   //for dynamic adding and removal of satellites 
   const[allSatellites,setAllSatellites] = useState<SatelliteObject[]>([]);         //this use state holds all the satellites that the backend sends
   const[activeSatellites,setActiveSatellites] = useState<SatelliteObject[]>([]);  //this state variable holds all the active satellites i.e satellites that the user has cliked on right nown
@@ -466,7 +466,7 @@ activeSatellites.forEach(sat=>{
 
         //COLLISION DETECTION LOGIC----------------------
 
-        const collisionThreshold = 0.5;        //the least distance satellites can come close to each other before getting flagged red 
+        const collisionThreshold = 1.0;        //the least distance satellites can come close to each other before getting flagged red 
 
         let collisionDetected = false;
 
