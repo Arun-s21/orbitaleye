@@ -639,14 +639,14 @@ activeSatellites.forEach(sat=>{
 
     return (
       <li key={sat.name}>
-        <button
-          onClick={() => handleSatellite(sat)}                                  
-          className={`cursor-pointer p-1 hover:bg-slate-500 ${
-            isActive ? "text-red-500" : "text-white"                              //if the current satellite from allSatellite array isActive then it should appear red else it should appear white
-          }`}
-        >
-          {sat.name}
-        </button>
+       <button
+    onClick={() => handleSatellite(sat)}
+    className="cursor-pointer p-1 hover:bg-slate-500"
+    style={{ color: isActive ? sat.originalColor.getStyle() : "white" }}
+  >
+    {sat.name}
+  </button>
+
       </li>
     );
   })}
