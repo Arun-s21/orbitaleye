@@ -7,19 +7,7 @@ import axios from 'axios';
 import * as satellite from 'satellite.js';
 import { AxiosError } from 'axios';
 
-// Define a type for our satellite data to make the code safer
-// type Satellite = {
-//   id: string;
-//   name: string;
-//   color: number;
-//   orbit: {                         //it was used when we were fetching dummy data from our backend
-//     radius: number;
-//     speed: number;
-//     inclination: number;
-//   };
-// };
 
-//commit example
 function makeTextSprite(message: string) {                              //function to give labels(names) to each satellite, we are using Three.Sprite 
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d")!;
