@@ -302,65 +302,7 @@ scene.add(sun);
     controls.enableDamping = true;
     camera.position.z = 5;
 
-    // --- Animation loop ---
-    
-
-
-//------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------
-
-
-        // // Animate satellites based on the fetched data
-        // satelliteObjects.forEach((sat, index) => {
-        //     const satData = satellites[index];
-        //     const time = Date.now() * 0.0001 * satData.orbit.speed;                    //here we are setting the speed of each satellite
-            
-        //     sat.position.x = Math.cos(time) * satData.orbit.radius;                    //setting the radius of each satellite's orbit
-        //     sat.position.z = Math.sin(time) * satData.orbit.radius;
-            
-        //     // Apply the tilt (inclination)
-        //     // const orbitPlane = new THREE.Object3D();                                  //since each satellite is now in the x-z plane we are setting the inclination here to separate each of their orbits through inlcination on the x-axis
-        //     // orbitPlane.rotation.x = satData.orbit.inclination;                        //get the x-inclination from satellites.orbit.inclination
-        //     // sat.position.applyEuler(orbitPlane.rotation);                             // this statement applies the different orbital tilts
-        // });
-
-
-
-        // //Collision detection logic---
-
-        // const collisionThreshold = 0.5;                                               //if satellites get closer than this, we'll flag them as red
-
-        // satelliteObjects.forEach((sat, index) => {
-        //   (sat.material as THREE.MeshBasicMaterial).color.set(satellites[index].color);     //resetting each satellite to their original color first
-        // });
-
-        // //we are resetting color to original because we want the color of the satellites to be red only for the time they are below distanceThreshold in closeness
-        // //because the animate function keeps them moving, we keep resetting them to original color and keep on checking their distance by looping through the satelliteObject array
-        // //if they move further away then we set their color to original and the if condition of the color setting doesnt run and the satellites return to their original color
-
-
-
-
-
-
-        // //now looping through each satellite and findind distance between them each time the animate functions runs(60 times per second)
-
-        // for(let i=0;i<satelliteObjects.length;i++){
-        //   for(let j=i+1;j<satelliteObjects.length;j++){
-        //     const sat1 = satelliteObjects[i];
-        //     const sat2 = satelliteObjects[j];
-
-        //     // calculate distance
-        //     const distance = sat1.position.distanceTo(sat2.position); 
-
-        //     if(distance<collisionThreshold){
-        //       (sat1.material as THREE.MeshBasicMaterial).color.set('red');      //setting both their colors red if the distance is less than threshold
-        //       (sat2.material as THREE.MeshBasicMaterial).color.set('red');
-        //     }
-
-
-        //   }
-        // }
+  
 
 
 
@@ -370,7 +312,10 @@ scene.add(sun);
 
 
 
-        //animate function for dummy satellites that we fed through the backend earlier
+
+
+
+
 //------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------
 
