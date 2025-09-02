@@ -185,7 +185,7 @@ const sunRef = useRef(new THREE.Mesh(sunGeometryRef.current, sunMaterialRef.curr
 
 
       } catch (err) {
-        // FIX: Use a specific type for the error
+        
         const error = err as AxiosError;
         console.error("Failed to fetch satellite data:", error.message);
       }
@@ -371,18 +371,7 @@ activeSatellites.forEach(sat=>{
             }
         });
 
-        //-----------------------------------
-        //animating the sun revolution
-        // const sunOrbitSpeed = 0.00005;
-        // const sunOrbitRadius = 150;
-        // const time = Date.now();
-        // //x and z coordinate of sun, the plane in which sun will revolve in x-z axis
-        // const sunX = Math.cos(time*sunOrbitSpeed)*sunOrbitRadius;
-        // const sunZ = Math.sin(time*sunOrbitSpeed)*sunOrbitRadius;
-
-        // sun.position.set(sunX, 0, sunZ);
-
-
+       
 
         //COLLISION DETECTION LOGIC----------------------
 
