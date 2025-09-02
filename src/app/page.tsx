@@ -69,7 +69,7 @@ export default function HomePage() {
     const earthRef = useRef(new THREE.Mesh(earthGeometryRef.current, earthMaterialRef.current));
 
 
-    const ambientLightRef = useRef(new THREE.AmbientLight(0xffffff, 0.5));                         //ambient light makes the earth appear and look brighter
+    const ambientLightRef = useRef(new THREE.AmbientLight(0xffffff, 0.8));                         //ambient light makes the earth appear and look brighter
 
 
 
@@ -81,9 +81,6 @@ export default function HomePage() {
 const sunMaterialRef = useRef(new THREE.MeshBasicMaterial({
   map: sunTextureRef.current}));
 const sunRef = useRef(new THREE.Mesh(sunGeometryRef.current, sunMaterialRef.current));
-const starGeometryRef = useRef(new THREE.BufferGeometry());
-const starVerticesRef = useRef<number[]>([]);
-const starMaterialRef = useRef(new THREE.PointsMaterial({ color: 'white', size: 0.1 }));
 
 //we cant use useRef inside a useEFfect so we had to take the neccesary constants outside
 
@@ -111,24 +108,14 @@ const starMaterialRef = useRef(new THREE.PointsMaterial({ color: 'white', size: 
     
 
 
-     const starGeometry =starGeometryRef.current;                         //for stars we create a huge hollow sphere of tiny dots and placing out cmaera inside it 
-    const starVertices = starVerticesRef.current;
-    for (let i = 0; i < 10000; i++) {
-        const x = (Math.random() - 0.5) * 2000;                           //In each loop, we generate a random X, Y, and Z coordinate and add it to a simple array. This creates a cloud of random points.
-        const y = (Math.random() - 0.5) * 2000;
-        const z = (Math.random() - 0.5) * 2000;
-        starVerticesRef.current.push(x, y, z);
-    }
-    starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));               //This takes our array of coordinates and attaches it to our geometry container.
-
-
-    const starMaterial = starMaterialRef.current;                           //This defines the appearance of each point (a small, white dot).
-     const stars = new THREE.Points(starGeometry, starMaterial);                     //This combines the geometry (the positions) and the material (the appearance) to create the final starfield object, which we then add to our scene.
-
-    //adding stars to our scene
-    sceneRef.current.add(stars); 
-
-
+      const spaceTextureLoader = new THREE.TextureLoader();
+  spaceTextureLoader.load("/space-panorama.jpg", (texture) => {
+    // This tells three.js how to wrap the 2D texture into a 3D sphere.
+    texture.mapping = THREE.EquirectangularReflectionMapping;
+    
+    // Set the texture as the scene's background.
+    sceneRef.current.background = texture;
+  });
 
 
   },[]);
@@ -534,9 +521,9 @@ activeSatellites.forEach(sat=>{
      
       <div ref={mountRef} className="absolute top-0 w-full h-full" />
 
-      {/* This div is for your UI overlays */}
+     
       <div>
-        {/* The speed slider (correctly on the top-left) */}
+      
         <div className="fixed top-4 left-4 bg-gray-900 bg-opacity-70 backdrop-blur-md text-gray-200 border border-gray-700 rounded p-2 shadow">
           <label className="text-sm font-semibold">Speed Multiplier: {satelliteSpeed}x</label>
           <input
@@ -552,7 +539,7 @@ activeSatellites.forEach(sat=>{
         {/* The collision alert */}
         {collision && (
           
-          <div className="absolute top-4 right-4 bg-red-500/80 text-white p-4 rounded-lg shadow-lg backdrop-blur-sm">
+          <div className="absolute top-4 right-4 bg-slate-500/80 text-white p-4 rounded-lg shadow-lg backdrop-blur-sm">
             <h3 className="font-bold text-lg">⚠️ Collision Alert!</h3>
             <p className="text-sm">
               {collision.sat1} and {collision.sat2} are too close!
@@ -563,8 +550,8 @@ activeSatellites.forEach(sat=>{
           </div>
         )}  
 <div className="absolute top-1/4 left-4 z-10">
-  <h3 className="text-white p-1">Currently Available Satellites</h3>
-  <h4 className="text-white p-1">Click on each to see their path and behavior</h4>
+  <h3 className="text-white p-1 text-2xl underline font-bold">Currently Available Satellites</h3>
+  <h4 className="text-white p-1 font-bold ">Click on each to see their path and behavior</h4>
 
   <ul>
   {allSatellites.map(sat => {
