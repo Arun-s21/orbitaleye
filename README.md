@@ -39,25 +39,25 @@ To run this project on your local machine, follow these steps:
 
 ### 1. Prerequisites
 
-Make sure you have [Node.js](https://nodejs.org/) (version 18.x or later) and npm installed on your system.
+Make sure you have  Node.js and npm installed on your system.
 
 ### 2. Clone the Repository
 
 Clone this project to your local machine:
 ```bash
-git clone [https://github.com/Arun-s21/orbitaleye](https://github.com/Arun-s21/orbitaleye)
+git clone https://github.com/Arun-s21/orbitaleye
 cd orbital-eye
 
 
-### 3. Install Dependencies
+3. Install Dependencies
 Install the necessary npm packages. This command will download all the required libraries listed in the package.json file, such as React, Three.js, and Next.js.
 ```bash
 npm install
 
 
-### 4. Run the Development Server
+4. Run the Development Server
 Start the Next.js development server. This will launch the application on your local machine with hot-reloading enabled, meaning any changes you save to the code will be reflected instantly in the browser.
 
 
-### 5. Open in Browser
+5. Open in Browser
 Once the server is running, open http://localhost:3000 in your web browser to see the application running.
