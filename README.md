@@ -51,7 +51,7 @@ cd orbital-eye
 
 3. Install Dependencies
 Install the necessary npm packages. This command will download all the required libraries listed in the package.json file, such as React, Three.js, and Next.js.
-```bash
+
 npm install
 
 
