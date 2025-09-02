@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Orbital Eye: A 3D Satellite Tracker
 
-## Getting Started
 
-First, run the development server:
 
+Orbital Eye is an interactive, real-time 3D visualization of satellites orbiting a realistic model of Earth. Built with Next.js and Three.js, this application fetches real Two-Line Element (TLE) data to accurately calculate and display the paths of various satellites.
+
+**Live Demo:** [https://orbitaleye-alpha.vercel.app/](https://your-deployment-link.vercel.app/) _(You can replace this with your actual Vercel link)_
+
+---
+
+## ✨ Key Features
+
+* **Real-Time Satellite Tracking:** Utilizes the `satellite.js` library to accurately propagate satellite positions from real TLE data.
+* **Interactive 3D Globe:** A fully interactive 3D scene built with Three.js, featuring a textured Earth, a moving Sun, and a realistic starfield skybox.
+* **Dynamic Satellite Selection:** Users can select from a list of available satellites to dynamically add or remove them from the scene.
+* **Visual Orbits:** Each active satellite has its orbital path rendered as a line, making it easy to visualize its trajectory.
+* **Collision Detection:** The application monitors the distance between all active satellites and displays a prominent on-screen alert if they come within a predefined threshold.
+* **Realistic Day/Night Cycle:** The sun's position and lighting are animated, creating a realistic day/night cycle on the Earth's surface.
+* **User Controls:**
+    * **Camera:** Full orbital camera controls (zoom, pan, rotate) are enabled via `OrbitControls`.
+    * **Simulation Speed:** A slider allows the user to speed up or slow down the simulation time.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Framework:** Next.js (React)
+* **Language:** TypeScript
+* **3D Rendering:** Three.js
+* **Orbital Mechanics:** satellite.js
+* **Styling:** Tailwind CSS
+* **Deployment:** Vercel
+
+---
+
+## 🚀 Getting Started
+
+To run this project on your local machine, follow these steps:
+
+### 1. Prerequisites
+
+Make sure you have [Node.js](https://nodejs.org/) (version 18.x or later) and npm installed on your system.
+
+### 2. Clone the Repository
+
+Clone this project to your local machine:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+git clone [https://github.com/Arun-s21/orbitaleye](https://github.com/Arun-s21/orbitaleye)
+cd orbital-eye
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Install Dependencies
+Install the necessary npm packages. This command will download all the required libraries listed in the package.json file, such as React, Three.js, and Next.js.
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+4. Run the Development Server
+Start the Next.js development server. This will launch the application on your local machine with hot-reloading enabled, meaning any changes you save to the code will be reflected instantly in the browser.
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. Open in Browser
+Once the server is running, open http://localhost:3000 in your web browser to see the application running.
