@@ -373,14 +373,14 @@ activeSatellites.forEach(sat=>{
 
         //-----------------------------------
         //animating the sun revolution
-        const sunOrbitSpeed = 0.00005;
-        const sunOrbitRadius = 150;
-        const time = Date.now();
-        //x and z coordinate of sun, the plane in which sun will revolve in x-z axis
-        const sunX = Math.cos(time*sunOrbitSpeed)*sunOrbitRadius;
-        const sunZ = Math.sin(time*sunOrbitSpeed)*sunOrbitRadius;
+        // const sunOrbitSpeed = 0.00005;
+        // const sunOrbitRadius = 150;
+        // const time = Date.now();
+        // //x and z coordinate of sun, the plane in which sun will revolve in x-z axis
+        // const sunX = Math.cos(time*sunOrbitSpeed)*sunOrbitRadius;
+        // const sunZ = Math.sin(time*sunOrbitSpeed)*sunOrbitRadius;
 
-        sun.position.set(sunX, 0, sunZ);
+        // sun.position.set(sunX, 0, sunZ);
 
 
 
