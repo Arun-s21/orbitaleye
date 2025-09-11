@@ -260,30 +260,6 @@ scene.add(sun);
     //we did not give any coordinates to our main actor(earth) so it is by default placed at (0,0,0) i.e the center of our stage
 
 
-
-
-
-
-
-
-    // --- 4. DYNAMIC Satellites & Orbits ---
-    // const satelliteObjects: THREE.Mesh[] = [];                                          //array to store satellites from fetched from our backend 
-    
-    
-
-    // satellites.forEach(satData => {                                                     //we are looping through the sattelites object that we received from the backend here
-    //   const satGeometry = new THREE.SphereGeometry(0.05, 8, 8);                         //here we are giving the shape of the satellites i.e 0.5 radius circles
-    //   const satMaterial = new THREE.MeshBasicMaterial({ color: satData.color });        //color that is stored inside satellites.color
-    //   const satellite = new THREE.Mesh(satGeometry, satMaterial);                       //combining the shape and the color
-    //   satelliteObjects.push(satellite);                                                 //adding the satellite to the satellite array here this would be used later for animating the satellites
-    //   scene.add(satellite);                                                             //adding the created satellites to our scene                                 
-    // });     
-
-
-   
-
-
-
     // --- Controls ---
     const controls = new OrbitControls(camera, renderer.domElement);                    //cursor controls
     controls.enableDamping = true;
