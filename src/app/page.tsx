@@ -292,7 +292,6 @@ const animate = () => {
         earth.rotation.y += 0.001;
 
 
-        // console.log('Loaded satellites:', satellites.map(s => s.name));
 
 const currentTime = Date.now();
 //this line gets the exact miliseconds at every frame of the animation
@@ -421,26 +420,26 @@ activeSatellites.forEach(sat=>{
 
 
 
+  
   //-----------------------------Dynamically adding satellites to our scene
 
   useEffect(()=>{
-    
-    activeSatellites.forEach(satData=>{
-      const alreadyExists = sceneRef.current.getObjectByName(satData.name);
+  activeSatellites.forEach(satData=>{
+      const alreadyExists = sceneRef.current.getObjectByName(satData.name);   //check if the satellite we are adding already exists in the scene or not 
       if(!alreadyExists){
         sceneRef.current.add(satData.mesh);
-
-
-
       }
-
-
     })
-
-
-
-
   },[activeSatellites]);                      //whenever user clicks on a new satellite, activeSatellite changes and this useEffect runs and adds that satellite to our scene
+
+
+
+
+    
+    
+    
+
+
 
 
 
@@ -483,12 +482,12 @@ activeSatellites.forEach(sat=>{
 
   return (
     <div className="relative w-full h-screen bg-black">
-     
+
       <div ref={mountRef} className="absolute top-0 w-full h-full" />
 
-     
+
       <div>
-      
+
         <div className="fixed top-4 left-4 bg-gray-900 bg-opacity-70 backdrop-blur-md text-gray-200 border border-gray-700 rounded p-2 shadow">
           <label className="text-sm font-semibold">Speed Multiplier: {satelliteSpeed}x</label>
           <input
@@ -503,7 +502,7 @@ activeSatellites.forEach(sat=>{
 
         {/* The collision alert */}
         {collision && (
-          
+
           <div className="absolute top-4 right-4 bg-slate-500/80 text-white p-4 rounded-lg shadow-lg backdrop-blur-sm">
             <h3 className="font-bold text-lg">⚠️ Collision Alert!</h3>
             <p className="text-sm">
@@ -513,30 +512,30 @@ activeSatellites.forEach(sat=>{
               Distance: {collision.distance.toFixed(2)} units               {/*toFixed makes sure we only get two decimal places value*/}
             </p>
           </div>
-        )}  
-<div className="absolute top-1/4 left-4 z-10">
-  <h3 className="text-white p-1 text-2xl underline font-bold">Currently Available Satellites</h3>
-  <h4 className="text-white p-1 font-bold ">Click on each to see their path and behavior</h4>
+        )}
+        <div className="absolute top-1/4 left-4 z-10">
+          <h3 className="text-white p-1 text-2xl underline font-bold">Currently Available Satellites</h3>
+          <h4 className="text-white p-1 font-bold ">Click on each to see their path and behavior</h4>
 
-  <ul>
-  {allSatellites.map(sat => {
-    const isActive = activeSatellites.some(active => active.name === sat.name);         //check each element from allSatellites if it exists in activeSatellites also if yes then set isActive to true 
+          <ul>
+            {allSatellites.map(sat => {
+              const isActive = activeSatellites.some(active => active.name === sat.name);         //check each element from allSatellites if it exists in activeSatellites also if yes then set isActive to true 
 
-    return (
-      <li key={sat.name}>
-       <button
-    onClick={() => handleSatellite(sat)}
-    className="cursor-pointer p-1 hover:bg-slate-500"
-    style={{ color: isActive ? sat.originalColor.getStyle() : "white" }}
-  >
-    {sat.name}
-  </button>
+              return (
+                <li key={sat.name}>
+                  <button
+                    onClick={() => handleSatellite(sat)}
+                    className="cursor-pointer p-1 hover:bg-slate-500"
+                    style={{ color: isActive ? sat.originalColor.getStyle() : "white" }}
+                  >
+                    {sat.name}
+                  </button>
 
-      </li>
-    );
-  })}
-</ul>
-</div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </div>
     </div>
   );
@@ -547,6 +546,5 @@ activeSatellites.forEach(sat=>{
 
 
 
-        
-    
-   
+
+
